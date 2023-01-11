@@ -19,10 +19,16 @@ def msg_handler(msg):
     print(chat_id,text)
     if text == '/start':
         bot.reply_to(msg,"Hello World!")
-    elif text == "/list":
+    elif text == "/do_list":
         txt = "DigitalOcean Servers List:\n\n"
         my_droplets = manager.get_all_droplets()
         for i,droplet in enumerate(my_droplets):
             txt += f"{i+1}. {droplet.name} — {droplet.ip_address} — {droplet.status} — {droplet.region.get('name')} — /do_delete_{droplet.id} \n"
         bot.send_message(chat_id,txt)
+    elif match := re.match(r"/do_delete_(\d+)", text):
+        try:
+            droplet = manager.get_droplet(int(match.group(1)))
+            droplet.destroy()
+            bot.reply_to(msg, f"Droplet `{droplet.name}` destroyed!",parse_mode="markdown")
+        except: bot.reply_to(msg, "Droplet not found or something is wrong!")
 bot.infinity_polling(skip_pending=True)
