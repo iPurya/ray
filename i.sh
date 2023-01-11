@@ -28,9 +28,9 @@ function cleanup {
 }
 trap cleanup EXIT
 
-MYUSER=$(cat /dev/urandom | tr -dc '[:alpha:]' | fold -w ${1:-12} | head -n 1)
-MYPORT=$(shuf -i 2023-64999 -n1)
-MYPASS=$(cat /dev/urandom | tr -dc '[:alpha:]0-9' | fold -w ${1:-40} | head -n 1)
+MYUSER=$2
+MYPORT=$4
+MYPASS=$3
 TNAME=$(cat /dev/urandom | tr -dc '[:alpha:]0-9' | fold -w ${1:-12} | head -n 1)
 TPASS=$(cat /dev/urandom | tr -dc '[:alpha:]0-9' | fold -w ${1:-12} | head -n 1)
 TPORT=443
