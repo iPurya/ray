@@ -1,3 +1,3 @@
 BOT_TOKEN = ""
-
+DO_API_KEY = ""
 ADMINS = (590740002,)
