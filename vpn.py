@@ -2,6 +2,8 @@ import digitalocean
 from telebot import TeleBot
 from redis import Redis
 import config
+import time
+import re
 
 redis = Redis(db=5 , charset="utf-8", decode_responses=True)
 
@@ -9,6 +11,7 @@ bot = TeleBot(config.BOT_TOKEN)
 print(f"Bot Started @{bot.get_me().username}")
 
 manager = digitalocean.Manager(token=config.DO_API_KEY)
+keys = manager.get_all_sshkeys() # sshkey manually added from digitalocean panel
 
 @bot.message_handler()
 def msg_handler(msg):
@@ -31,4 +34,23 @@ def msg_handler(msg):
             droplet.destroy()
             bot.reply_to(msg, f"Droplet `{droplet.name}` destroyed!",parse_mode="markdown")
         except: bot.reply_to(msg, "Droplet not found or something is wrong!")
+    elif text == "/do_create":
+        droplet = digitalocean.Droplet(token=API_KEY,
+                               name=f'{random.randint(10000,99999)}',
+                               region='ams3', # pick random region later or get it from user
+                               image='ubuntu-20-04-x64', # Ubuntu 20.04 x64
+                               size_slug='s-1vcpu-1gb-amd',  # 1GB RAM, 1 vCPU - $7 (maybe $4 later)
+                               ssh_keys=keys)
+        droplet.create()
+        done = False
+        while not done:
+            actions = droplet.get_actions()
+            for action in actions:
+                action.load()
+                if action.status == "completed":
+                    done = True
+                    break
+            time.sleep(1)
+        droplet = manager.get_droplet(droplet.id)
+        bot.reply_to(msg,f"Created {droplet.name} — {droplet.region.get('name')} — {droplet.ip_address}")
 bot.infinity_polling(skip_pending=True)
