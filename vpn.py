@@ -43,7 +43,7 @@ def msg_handler(msg):
             bot.reply_to(msg, f"Droplet `{droplet.name}` destroyed!",parse_mode="markdown")
         except: bot.reply_to(msg, "Droplet not found or something is wrong!")
     elif text == "/do_create":
-        droplet = digitalocean.Droplet(token=API_KEY,
+        droplet = digitalocean.Droplet(token=DO_API_KEY,
                                name=f'vps-{random.randint(10000,99999)}',
                                region='ams3', # pick random region later or get it from user
                                image='ubuntu-20-04-x64', # Ubuntu 20.04 x64
