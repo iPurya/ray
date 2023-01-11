@@ -3,6 +3,7 @@ from telebot import TeleBot
 from redis import Redis
 import digitalocean
 import config
+import random
 import time
 import re
 
@@ -19,8 +20,9 @@ def ssh_connect(ip_address):
     client.load_system_host_keys()
     client.set_missing_host_key_policy(AutoAddPolicy())
     client.connect(ip_address, username="root", key_filename="id_rsa")
-    stdin, stdout, stderr = client.exec_command('hostname')
-
+    stdin, stdout, stderr = client.exec_command("apt-get -y update && apt-get -o Dpkg::Options::='--force-confold' -fuy dist-upgrade")
+    print("DONE")
+    print(stdout.readlines())
 @bot.message_handler()
 def msg_handler(msg):
     text = str(msg.text or msg.caption or '')
@@ -43,22 +45,17 @@ def msg_handler(msg):
             bot.reply_to(msg, f"Droplet `{droplet.name}` destroyed!",parse_mode="markdown")
         except: bot.reply_to(msg, "Droplet not found or something is wrong!")
     elif text == "/do_create":
-        droplet = digitalocean.Droplet(token=DO_API_KEY,
+        droplet = digitalocean.Droplet(token=config.DO_API_KEY,
                                name=f'vps-{random.randint(10000,99999)}',
                                region='ams3', # pick random region later or get it from user
                                image='ubuntu-20-04-x64', # Ubuntu 20.04 x64
                                size_slug='s-1vcpu-1gb-amd',  # 1GB RAM, 1 vCPU - $7 (maybe $4 later)
                                ssh_keys=keys)
         droplet.create()
-        done = False
-        while not done:
-            actions = droplet.get_actions()
-            for action in actions:
-                action.load()
-                if action.status == "completed":
-                    done = True
-                    break
+        while True:
             time.sleep(1)
-        droplet = manager.get_droplet(droplet.id)
+            droplet.load()
+            if droplet.status == "active" and droplet.ip_address:
+                break
         bot.reply_to(msg,f"Created {droplet.name} — {droplet.region.get('name')} — {droplet.ip_address}")
 bot.infinity_polling(skip_pending=True)
