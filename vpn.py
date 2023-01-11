@@ -1,6 +1,7 @@
-import digitalocean
+from paramiko.client import SSHClient, AutoAddPolicy
 from telebot import TeleBot
 from redis import Redis
+import digitalocean
 import config
 import time
 import re
@@ -12,6 +13,13 @@ print(f"Bot Started @{bot.get_me().username}")
 
 manager = digitalocean.Manager(token=config.DO_API_KEY)
 keys = manager.get_all_sshkeys() # sshkey manually added from digitalocean panel
+
+def ssh_connect(ip_address):
+    client = SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(AutoAddPolicy())
+    client.connect(ip_address, username="root", key_filename="id_rsa")
+    stdin, stdout, stderr = client.exec_command('hostname')
 
 @bot.message_handler()
 def msg_handler(msg):
@@ -36,7 +44,7 @@ def msg_handler(msg):
         except: bot.reply_to(msg, "Droplet not found or something is wrong!")
     elif text == "/do_create":
         droplet = digitalocean.Droplet(token=API_KEY,
-                               name=f'{random.randint(10000,99999)}',
+                               name=f'vps-{random.randint(10000,99999)}',
                                region='ams3', # pick random region later or get it from user
                                image='ubuntu-20-04-x64', # Ubuntu 20.04 x64
                                size_slug='s-1vcpu-1gb-amd',  # 1GB RAM, 1 vCPU - $7 (maybe $4 later)
