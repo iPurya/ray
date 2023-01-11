@@ -3,9 +3,8 @@ set -e
 HC='\033[1;32m'
 NC='\033[0m'
 echo ""
-read -e -p " [?] Enter your domain or subdomain: " MYDOMAIN
-MYDOMAIN=$(echo "$MYDOMAIN" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-[[ -z "$MYDOMAIN" ]] && { echo "Error: Domain URL is needed."; exit 1; }
+
+MYDOMAIN=$1
 
 echo -e "\n$HC+$NC Checking IP <=> Domain..."
 RESIP=$(dig +short "$MYDOMAIN" | grep '^[.0-9]*$' || echo 'NONE')
