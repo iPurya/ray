@@ -31,6 +31,7 @@ def msg_handler(msg):
     if not from_id in config.ADMINS: return
     print(chat_id,text)
     if text == '/start':
+        ssh_connect("134.209.194.75")
         bot.reply_to(msg,"Hello World!")
     elif text == "/do_list":
         txt = "DigitalOcean Servers List:\n\n"
@@ -57,5 +58,5 @@ def msg_handler(msg):
             droplet.load()
             if droplet.status == "active" and droplet.ip_address:
                 break
-        bot.reply_to(msg,f"Created {droplet.name} — {droplet.region.get('name')} — {droplet.ip_address}")
+        bot.reply_to(msg,f"Created `{droplet.name}` — {droplet.region.get('name')} — `{droplet.ip_address}`", parse_mode="markdown")
 bot.infinity_polling(skip_pending=True)
