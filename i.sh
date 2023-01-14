@@ -29,10 +29,10 @@ function cleanup {
 trap cleanup EXIT
 
 MYUSER=$2
-MYPORT=$4
-MYPASS=$3
-TNAME=$(cat /dev/urandom | tr -dc '[:alpha:]0-9' | fold -w ${1:-12} | head -n 1)
-TPASS=$(cat /dev/urandom | tr -dc '[:alpha:]0-9' | fold -w ${1:-12} | head -n 1)
+MYPORT=$3
+MYPASS=$2
+TNAME="@Get2Ray"
+TPASS=$(cat /dev/urandom | tr -dc '[:alpha:]0-9' | fold -w 12 | head -n 1)
 TPORT=443
 NOW=$(date +"%T")
 
@@ -67,18 +67,6 @@ $MYUSER
 $MYPASS
 $MYPORT
 " | ./install.sh 2>> 2.log 1>> 1.log
-
-echo -e "\n$HC+$NC Configuring firewall..."
-ufw status 2>> 2.log 1>> 1.log
-echo "y" | ufw reset 2>> 2.log 1>> 1.log
-ufw status 2>> 2.log 1>> 1.log
-ufw default allow outgoing 2>> 2.log 1>> 1.log
-ufw default deny incoming 2>> 2.log 1>> 1.log
-ufw allow ssh 2>> 2.log 1>> 1.log
-ufw allow 80 2>> 2.log 1>> 1.log
-ufw allow $TPORT 2>> 2.log 1>> 1.log
-ufw deny $MYPORT 2>> 2.log 1>> 1.log
-echo "y" | ufw enable 2>> 2.log 1>> 1.log
 
 echo -e "\n$HC+$NC Creating the config..."
 
